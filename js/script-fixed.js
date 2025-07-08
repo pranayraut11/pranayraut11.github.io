@@ -403,8 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
     createParticleEffect();
     
     // Check if date converter elements exist
-    const dateConverterExists = inputDate && inputFormat && outputFormat && convertDateBtn && dateResult && copyDateBtn && quickDateBtns;
-    
+    const dateConverterExists = inputDate && inputFormat && outputFormat && 
+                                convertDateBtn && dateResult && copyDateBtn;
+                                
     if (dateConverterExists) {
         console.log("Date converter elements found");
         
@@ -433,16 +434,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (inFormat === 'unix') {
                     // Unix timestamp (seconds since epoch)
                     date = new Date(parseInt(input) * 1000);
-                } else {
-                    // Parse with date-fns if available, or fallback to built-in Date
-                    if (typeof dateFns !== 'undefined') {
-                        // Use date-fns parse with selected format
-                        const formatString = getFormatString(inFormat);
+                } else if (typeof dateFns !== 'undefined') {
+                    // Use date-fns parse with selected format
+                    const formatString = getFormatString(inFormat);
+                    try {
                         date = dateFns.parse(input, formatString, new Date());
-                    } else {
-                        // Simple fallback
+                    } catch (e) {
+                        // Fallback to built-in Date
+                        console.log("Error parsing with date-fns, fallback to built-in Date", e);
                         date = new Date(input);
                     }
+                } else {
+                    // Simple fallback using built-in Date
+                    date = new Date(input);
                 }
                 
                 // Validate date
@@ -473,6 +477,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         result = Math.floor(date.getTime() / 1000).toString();
                     } else if (outFormat === 'iso8601') {
                         result = date.toISOString();
+                    } else if (outFormat === 'YYYY-MM-DD') {
+                        result = date.toISOString().split('T')[0];
+                    } else if (outFormat === 'MM/DD/YYYY') {
+                        result = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+                    } else if (outFormat === 'DD/MM/YYYY') {
+                        result = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
                     } else {
                         result = date.toLocaleDateString();
                     }
@@ -538,9 +548,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 if (inputFormat.value === 'unix') {
                     inputDate.value = Math.floor(date.getTime() / 1000);
+                } else if (inputFormat.value === 'YYYY-MM-DD') {
+                    inputDate.value = date.toISOString().split('T')[0];
+                } else if (inputFormat.value === 'MM/DD/YYYY') {
+                    inputDate.value = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+                } else if (inputFormat.value === 'DD/MM/YYYY') {
+                    inputDate.value = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
                 } else {
-                    // Simple fallback
-                    inputDate.value = date.toISOString().split('T')[0]; // YYYY-MM-DD
+                    inputDate.value = date.toISOString().split('T')[0]; // YYYY-MM-DD as fallback
                 }
             }
             
@@ -601,6 +616,412 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Enter') {
                 convertDate();
             }
+        });
+    }
+    
+    // IBAN and UUID Generator code
+    
+    // Country names by country code
+    const countryNames = {
+        'AT': 'Austria', 'BE': 'Belgium', 'BG': 'Bulgaria', 'CH': 'Switzerland',
+        'CZ': 'Czech Republic', 'DE': 'Germany', 'DK': 'Denmark', 'ES': 'Spain',
+        'FI': 'Finland', 'FR': 'France', 'GB': 'United Kingdom', 'GR': 'Greece',
+        'HR': 'Croatia', 'HU': 'Hungary', 'IE': 'Ireland', 'IT': 'Italy',
+        'LT': 'Lithuania', 'LU': 'Luxembourg', 'LV': 'Latvia', 'MT': 'Malta',
+        'NL': 'Netherlands', 'PL': 'Poland', 'PT': 'Portugal', 'RO': 'Romania',
+        'SE': 'Sweden', 'SI': 'Slovenia', 'SK': 'Slovakia'
+    };
+    
+    // IBAN structure details by country code
+    const ibanStructure = {
+        'AT': { length: 20, bban: 16 }, 'BE': { length: 16, bban: 12 },
+        'BG': { length: 22, bban: 18 }, 'CH': { length: 21, bban: 17 },
+        'CZ': { length: 24, bban: 20 }, 'DE': { length: 22, bban: 18 },
+        'DK': { length: 18, bban: 14 }, 'ES': { length: 24, bban: 20 },
+        'FI': { length: 18, bban: 14 }, 'FR': { length: 27, bban: 23 },
+        'GB': { length: 22, bban: 18 }, 'GR': { length: 27, bban: 23 },
+        'HR': { length: 21, bban: 17 }, 'HU': { length: 28, bban: 24 },
+        'IE': { length: 22, bban: 18 }, 'IT': { length: 27, bban: 23 },
+        'LT': { length: 20, bban: 16 }, 'LU': { length: 20, bban: 16 },
+        'LV': { length: 21, bban: 17 }, 'MT': { length: 31, bban: 27 },
+        'NL': { length: 18, bban: 14 }, 'PL': { length: 28, bban: 24 },
+        'PT': { length: 25, bban: 21 }, 'RO': { length: 24, bban: 20 },
+        'SE': { length: 24, bban: 20 }, 'SI': { length: 19, bban: 15 },
+        'SK': { length: 24, bban: 20 }
+    };
+    
+    // Generate a random IBAN
+    function generateRandomIBAN(countryCode) {
+        // Get the structure for the selected country
+        const structure = ibanStructure[countryCode];
+        if (!structure) {
+            return 'Invalid country code';
+        }
+        
+        // Generate random BBAN (Basic Bank Account Number)
+        const bbanChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let bban = '';
+        for (let i = 0; i < structure.bban; i++) {
+            bban += bbanChars.charAt(Math.floor(Math.random() * bbanChars.length));
+        }
+        
+        // Initial IBAN without check digits
+        let iban = countryCode + '00' + bban;
+        
+        // Calculate check digits (ISO 7064 MOD 97-10)
+        // Move the first four characters to the end
+        let rearranged = iban.substring(4) + iban.substring(0, 4);
+        
+        // Convert letters to numbers (A=10, B=11, ..., Z=35)
+        let numeric = '';
+        for (let i = 0; i < rearranged.length; i++) {
+            let char = rearranged.charAt(i);
+            if (/[A-Z]/.test(char)) {
+                numeric += (char.charCodeAt(0) - 55);
+            } else {
+                numeric += char;
+            }
+        }
+        
+        // Calculate mod 97 and subtract from 98
+        let remainder = 0;
+        for (let i = 0; i < numeric.length; i++) {
+            remainder = (remainder * 10 + parseInt(numeric.charAt(i))) % 97;
+        }
+        
+        let checkDigits = (98 - remainder).toString().padStart(2, '0');
+        
+        // Final IBAN with correct check digits
+        return countryCode + checkDigits + bban;
+    }
+    
+    // Format IBAN with spaces for better readability
+    function formatIBAN(iban) {
+        return iban.replace(/(.{4})/g, '$1 ').trim();
+    }
+    
+    // Validate IBAN
+    function validateIBAN(iban) {
+        // Remove spaces and convert to uppercase
+        iban = iban.replace(/\s/g, '').toUpperCase();
+        
+        // Basic format check: length and country code
+        if (iban.length < 5) {
+            return {
+                isValid: false,
+                message: 'IBAN is too short',
+                details: {
+                    country: 'Unknown',
+                    length: iban.length,
+                    format: 'Invalid',
+                    checkDigits: 'Invalid'
+                }
+            };
+        }
+        
+        const countryCode = iban.substring(0, 2);
+        const structure = ibanStructure[countryCode];
+        
+        // Check if country code is valid
+        if (!structure) {
+            return {
+                isValid: false,
+                message: 'Invalid country code',
+                details: {
+                    country: 'Unknown (' + countryCode + ')',
+                    length: iban.length,
+                    format: 'Invalid',
+                    checkDigits: 'Invalid'
+                }
+            };
+        }
+        
+        // Check length
+        if (iban.length !== structure.length) {
+            return {
+                isValid: false,
+                message: `IBAN length incorrect (should be ${structure.length} characters)`,
+                details: {
+                    country: countryNames[countryCode] || countryCode,
+                    length: `${iban.length} (should be ${structure.length})`,
+                    format: 'Invalid length',
+                    checkDigits: 'Not checked'
+                }
+            };
+        }
+        
+        // Character validation (only A-Z, 0-9 allowed)
+        if (!/^[A-Z0-9]+$/.test(iban)) {
+            return {
+                isValid: false,
+                message: 'IBAN contains invalid characters',
+                details: {
+                    country: countryNames[countryCode] || countryCode,
+                    length: iban.length,
+                    format: 'Invalid characters',
+                    checkDigits: 'Not checked'
+                }
+            };
+        }
+        
+        // Check digits validation (MOD 97-10)
+        const checkDigits = iban.substring(2, 4);
+        
+        // Rearrange and convert to numeric
+        let rearranged = iban.substring(4) + iban.substring(0, 4);
+        let numeric = '';
+        
+        for (let i = 0; i < rearranged.length; i++) {
+            let char = rearranged.charAt(i);
+            if (/[A-Z]/.test(char)) {
+                numeric += (char.charCodeAt(0) - 55);
+            } else {
+                numeric += char;
+            }
+        }
+        
+        // Calculate remainder
+        let remainder = 0;
+        for (let i = 0; i < numeric.length; i++) {
+            remainder = (remainder * 10 + parseInt(numeric.charAt(i))) % 97;
+        }
+        
+        const isValidChecksum = remainder === 1;
+        
+        return {
+            isValid: isValidChecksum,
+            message: isValidChecksum ? 'IBAN is valid' : 'Invalid check digits',
+            details: {
+                country: countryNames[countryCode] || countryCode,
+                length: `${iban.length} (correct)`,
+                format: 'Valid format',
+                checkDigits: isValidChecksum ? 'Valid' : 'Invalid'
+            }
+        };
+    }
+    
+    // Generate a random UUID v4
+    function generateUUIDv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+    
+    // Generate a time-based UUID v1
+    function generateUUIDv1() {
+        // Get current timestamp in milliseconds since epoch
+        const now = new Date().getTime();
+        
+        // Create a timestamp part (first 8 chars are based on time)
+        const timeLow = ((now & 0xffffffff) >>> 0).toString(16).padStart(8, '0');
+        
+        // Middle part (4 chars) - time mid
+        const timeMid = ((now & 0xffff00000000) >>> 32).toString(16).padStart(4, '0');
+        
+        // Time high and version (4 chars) - first 12 bits time high + 4 bits version (0001 for v1)
+        let timeHighAndVersion = ((now & 0xfff000000000000) >>> 48).toString(16).padStart(3, '0');
+        timeHighAndVersion = timeHighAndVersion + '1'; // Add version 1
+        
+        // Generate clock sequence and node parts with randomness
+        const clockSeqHiAndReserved = (Math.random() * 0x100 | 0x80).toString(16).padStart(2, '0');
+        const clockSeqLow = (Math.random() * 0x100).toString(16).padStart(2, '0');
+        
+        // Node part (12 chars) - use random values
+        const node = Array.from({length: 6}, () => 
+            Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+        ).join('');
+        
+        // Combine all parts
+        return `${timeLow}-${timeMid}-${timeHighAndVersion}-${clockSeqHiAndReserved}${clockSeqLow}-${node}`;
+    }
+    
+    // Get selected UUID version
+    function getSelectedUUIDVersion() {
+        for (const radio of uuidVersionRadios) {
+            if (radio.checked) {
+                return radio.value;
+            }
+        }
+        return 'v4'; // Default to v4
+    }
+    
+    // Generate UUID based on selected version
+    function generateUUID() {
+        const version = getSelectedUUIDVersion();
+        
+        if (version === 'v1') {
+            return generateUUIDv1();
+        } else {
+            return generateUUIDv4();
+        }
+    }
+    
+    // Add event listeners for IBAN and UUID generators
+    if (generateBtn && ibanResult && countrySelect) {
+        // IBAN Generator
+        function handleIBANGeneration() {
+            const countryCode = countrySelect.value;
+            if (!countryCode) {
+                alert('Please select a country');
+                return;
+            }
+            
+            // Generate IBAN
+            const iban = generateRandomIBAN(countryCode);
+            
+            // Format IBAN with spaces
+            const formattedIban = formatIBAN(iban);
+            
+            // Display result
+            ibanResult.textContent = formattedIban;
+            ibanResult.dataset.rawIban = iban; // Store raw IBAN for validation link
+        }
+        
+        generateBtn.addEventListener('click', handleIBANGeneration);
+        
+        // Generate an initial IBAN on page load
+        setTimeout(() => handleIBANGeneration(), 500);
+    }
+    
+    // UUID Generator
+    if (generateUuidBtn && uuidResult) {
+        function handleUUIDGeneration() {
+            const uuid = generateUUID();
+            uuidResult.textContent = uuid;
+            uuidResult.dataset.uuid = uuid;
+        }
+        
+        generateUuidBtn.addEventListener('click', handleUUIDGeneration);
+        
+        // Copy UUID to clipboard
+        if (uuidCopyBtn) {
+            uuidCopyBtn.addEventListener('click', () => {
+                const uuidToCopy = uuidResult.dataset.uuid || uuidResult.textContent;
+                
+                navigator.clipboard.writeText(uuidToCopy)
+                    .then(() => {
+                        // Show notification
+                        copyNotification.classList.add('show');
+                        
+                        // Hide notification after 2 seconds
+                        setTimeout(() => {
+                            copyNotification.classList.remove('show');
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy UUID to clipboard');
+                    });
+            });
+        }
+    }
+    
+    // IBAN Validator
+    if (validateIbanBtn && ibanToValidate && validationResult) {
+        function handleIBANValidation() {
+            const iban = ibanToValidate.value.trim();
+            if (!iban) {
+                alert('Please enter an IBAN to validate');
+                return;
+            }
+            
+            // Validate IBAN
+            const result = validateIBAN(iban);
+            
+            // Display validation result
+            validationResult.style.display = 'block';
+            validationMessage.textContent = result.message;
+            
+            if (result.isValid) {
+                validationResult.classList.add('valid');
+                validationResult.classList.remove('invalid');
+            } else {
+                validationResult.classList.add('invalid');
+                validationResult.classList.remove('valid');
+            }
+            
+            // Show detailed information
+            ibanCountryDetail.textContent = result.details.country;
+            ibanLengthDetail.textContent = result.details.length;
+            ibanFormatDetail.textContent = result.details.format;
+            ibanCheckDigitsDetail.textContent = result.details.checkDigits;
+        }
+        
+        validateIbanBtn.addEventListener('click', handleIBANValidation);
+        
+        // Validate on Enter key
+        ibanToValidate.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                handleIBANValidation();
+            }
+        });
+    }
+    
+    // Link between generator and validator
+    if (validateGeneratedLink && generateNewLink) {
+        validateGeneratedLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const currentIban = ibanResult.textContent.replace(/\s/g, '');
+            
+            if (currentIban && currentIban !== "Click the button to generate an IBAN") {
+                ibanToValidate.value = currentIban;
+                switchToTab('validator');
+                validateIbanBtn.click(); // Automatically validate the IBAN
+            } else {
+                alert('Please generate an IBAN first');
+            }
+        });
+        
+        generateNewLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchToTab('generator');
+            generateBtn.click(); // Automatically generate a new IBAN
+        });
+    }
+    
+    // Tab switching
+    function switchToTab(tabName) {
+        if (tabName === 'generator') {
+            generatorTab.classList.add('active');
+            validatorTab.classList.remove('active');
+            generatorContent.style.display = 'block';
+            validatorContent.style.display = 'none';
+        } else if (tabName === 'validator') {
+            validatorTab.classList.add('active');
+            generatorTab.classList.remove('active');
+            validatorContent.style.display = 'block';
+            generatorContent.style.display = 'none';
+        }
+    }
+    
+    // Add tab event listeners
+    if (generatorTab && validatorTab) {
+        generatorTab.addEventListener('click', () => switchToTab('generator'));
+        validatorTab.addEventListener('click', () => switchToTab('validator'));
+    }
+    
+    // Copy IBAN to clipboard
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const ibanToCopy = ibanResult.dataset.rawIban || ibanResult.textContent.replace(/\s/g, '');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(ibanToCopy)
+                .then(() => {
+                    // Show notification
+                    copyNotification.classList.add('show');
+                    
+                    // Hide notification after 2 seconds
+                    setTimeout(() => {
+                        copyNotification.classList.remove('show');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy IBAN to clipboard');
+                });
         });
     }
 });
