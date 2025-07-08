@@ -1,291 +1,262 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <meta name="description" content=""/>
-    <meta name="author" content=""/>
-    <title>Resume - Pranay Raut</title>
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico"/>
-    <!-- Font Awesome icons (free version)-->
-    <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
-    <!-- Google fonts-->
-    <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet"
-          type="text/css"/>
-    <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css"/>
-    <!-- Core theme CSS (includes Bootstrap)-->
-    <link href="css/styles.css" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBAN Generator, UUID & Date Converter</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <meta name="description" content="Generate and validate IBANs, create UUIDs, format JSON, convert dates - a modern toolkit for developers and financial professionals">
+    <meta name="theme-color" content="#3498db">
 </head>
-<body id="page-top">
-<!-- Navigation-->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
-    <a class="navbar-brand js-scroll-trigger" href="#page-top">
-        <span class="d-block d-lg-none">Pranay Raut</span>
-        <span class="d-none d-lg-block"><img class="img-fluid img-profile rounded-circle mx-auto mb-2"
-                                             src="assets/img/0.png" alt=""/></span>
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span
-            class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav">
-            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
-            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#experience">Experience</a></li>
-
-            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#skills">Skills</a></li>
-            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
-<!--            <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#interests">Interests</a></li>-->
-        </ul>
+<body>
+    <div class="container">
+        <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        
+        <header class="site-header">
+            <h1><i class="fas fa-random icon-spin"></i> IBAN, UUID & Date Tools</h1>
+            <p class="tagline">Modern tools for developers and financial professionals</p>
+        </header>
+        
+        <h2><i class="fas fa-university"></i> IBAN Tools</h2>
+        <div class="iban-tools-container card-container">
+            <div class="tabs">
+                <button class="tab-button active" id="generator-tab"><i class="fas fa-plus-circle"></i> Generator</button>
+                <button class="tab-button" id="validator-tab"><i class="fas fa-check-circle"></i> Validator</button>
+            </div>
+            
+            <div class="tab-content" id="generator-content">
+                <div class="country-selection">
+                    <label for="country-select"><i class="fas fa-globe-europe"></i> Country:</label>
+                    <div class="select-wrapper">
+                        <select id="country-select" class="fancy-select">
+                            <option value="AT">Austria (AT)</option>
+                            <option value="BE">Belgium (BE)</option>
+                            <option value="BG">Bulgaria (BG)</option>
+                            <option value="CH">Switzerland (CH)</option>
+                            <option value="CZ">Czech Republic (CZ)</option>
+                            <option value="DE">Germany (DE)</option>
+                            <option value="DK">Denmark (DK)</option>
+                            <option value="ES">Spain (ES)</option>
+                            <option value="FI">Finland (FI)</option>
+                            <option value="FR">France (FR)</option>
+                            <option value="GB">United Kingdom (GB)</option>
+                            <option value="GR">Greece (GR)</option>
+                            <option value="HR">Croatia (HR)</option>
+                            <option value="HU">Hungary (HU)</option>
+                            <option value="IE">Ireland (IE)</option>
+                            <option value="IT">Italy (IT)</option>
+                            <option value="LT">Lithuania (LT)</option>
+                            <option value="LU">Luxembourg (LU)</option>
+                            <option value="LV">Latvia (LV)</option>
+                            <option value="MT">Malta (MT)</option>
+                            <option value="NL">Netherlands (NL)</option>
+                            <option value="PL">Poland (PL)</option>
+                            <option value="PT">Portugal (PT)</option>
+                            <option value="RO">Romania (RO)</option>
+                            <option value="SE">Sweden (SE)</option>
+                            <option value="SI">Slovenia (SI)</option>
+                            <option value="SK">Slovakia (SK)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button id="generate-btn" class="fancy-button pulse-effect"><i class="fas fa-bolt"></i> Generate IBAN</button>
+                </div>
+                <div class="iban-box result-card">
+                    <div id="iban-result">Click the button to generate an IBAN</div>
+                    <button id="copy-btn" class="icon-button" title="Copy to clipboard">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div class="action-links">
+                    <a href="#" id="validate-generated-link"><i class="fas fa-check"></i> Validate this IBAN</a>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="validator-content" style="display: none;">
+                <div class="input-container">
+                    <div class="input-with-icon">
+                        <i class="fas fa-credit-card input-icon"></i>
+                        <input type="text" id="iban-to-validate" class="fancy-input" placeholder="Enter IBAN to validate..." autocomplete="off" spellcheck="false">
+                    </div>
+                    <button id="validate-iban-btn" class="fancy-button"><i class="fas fa-search"></i> Validate</button>
+                </div>
+                <div class="validation-result" id="validation-result">
+                    <div class="validation-icon"><i class="fas fa-info-circle"></i></div>
+                    <div class="validation-message">Enter an IBAN above to validate</div>
+                </div>
+                <div class="validation-details result-card" id="validation-details">
+                    <div class="validation-detail">
+                        <span class="detail-label"><i class="fas fa-flag"></i> Country:</span>
+                        <span class="detail-value" id="iban-country">-</span>
+                    </div>
+                    <div class="validation-detail">
+                        <span class="detail-label"><i class="fas fa-ruler"></i> Length:</span>
+                        <span class="detail-value" id="iban-length">-</span>
+                    </div>
+                    <div class="validation-detail">
+                        <span class="detail-label"><i class="fas fa-code"></i> Format:</span>
+                        <span class="detail-value" id="iban-format">-</span>
+                    </div>
+                    <div class="validation-detail">
+                        <span class="detail-label"><i class="fas fa-calculator"></i> Check Digits:</span>
+                        <span class="detail-value" id="iban-check-digits">-</span>
+                    </div>
+                </div>
+                <div class="action-links">
+                    <a href="#" id="generate-new-link"><i class="fas fa-magic"></i> Generate a new IBAN</a>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="section-divider">
+        
+        <h2><i class="fas fa-fingerprint"></i> UUID Generator</h2>
+        <div class="uuid-tools-container card-container">
+            <div class="uuid-box result-card">
+                <div id="uuid-result">Click the button to generate a UUID</div>
+                <button id="uuid-copy-btn" class="icon-button" title="Copy to clipboard">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <div class="button-container">
+                <button id="generate-uuid-btn" class="fancy-button pulse-effect purple"><i class="fas fa-random"></i> Generate UUID</button>
+            </div>
+            <div class="uuid-options fancy-radio-group">
+                <label class="fancy-radio">
+                    <input type="radio" name="uuid-version" value="v4" checked> 
+                    <span class="radio-indicator"></span>
+                    <span class="radio-label"><i class="fas fa-dice"></i> Version 4 (Random)</span>
+                </label>
+                <label class="fancy-radio">
+                    <input type="radio" name="uuid-version" value="v1"> 
+                    <span class="radio-indicator"></span>
+                    <span class="radio-label"><i class="fas fa-clock"></i> Version 1 (Time-based)</span>
+                </label>
+            </div>
+        </div>
+        
+        <hr class="section-divider">
+        
+        <h2><i class="fas fa-code"></i> JSON Formatter</h2>
+        <div class="json-tools-container card-container">
+            <div class="json-input-container">
+                <textarea id="json-input" class="json-textarea" placeholder="Paste your JSON here..."></textarea>
+                <div class="json-controls">
+                    <button id="format-json-btn" class="fancy-button"><i class="fas fa-indent"></i> Format JSON</button>
+                    <button id="minify-json-btn" class="fancy-button purple"><i class="fas fa-compress-arrows-alt"></i> Minify</button>
+                    <button id="clear-json-btn" class="fancy-button red"><i class="fas fa-trash-alt"></i> Clear</button>
+                    <button id="sample-json-btn" class="fancy-button green"><i class="fas fa-lightbulb"></i> Sample</button>
+                </div>
+                <div class="json-options">
+                    <label class="fancy-checkbox">
+                        <input type="checkbox" id="indent-with-tabs" checked>
+                        <span class="checkbox-indicator"></span>
+                        <span class="checkbox-label">Indent with Tabs</span>
+                    </label>
+                    <div class="space-input-container">
+                        <label for="indent-spaces">Spaces:</label>
+                        <input type="number" id="indent-spaces" min="1" max="8" value="2" class="indent-spaces-input">
+                    </div>
+                </div>
+            </div>
+            <div class="json-output-container">
+                <div class="json-output" id="json-output">
+                    <div class="json-output-placeholder">Formatted JSON will appear here</div>
+                </div>
+                <button id="copy-json-btn" class="fancy-button"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+        
+        <hr class="section-divider">
+        
+        <h2><i class="fas fa-calendar-alt"></i> Date Converter</h2>
+        <div class="date-converter-container card-container">
+            <div class="date-input-container">
+                <div class="input-group">
+                    <label for="input-date">Input Date:</label>
+                    <input type="text" id="input-date" class="fancy-input" placeholder="Enter date...">
+                </div>
+                <div class="input-group">
+                    <label for="input-format">Input Format:</label>
+                    <div class="select-wrapper">
+                        <select id="input-format" class="fancy-select">
+                            <option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</option>
+                            <option value="MM/DD/YYYY">MM/DD/YYYY (US)</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY (EU)</option>
+                            <option value="YYYY/MM/DD">YYYY/MM/DD</option>
+                            <option value="DD-MMM-YYYY">DD-MMM-YYYY</option>
+                            <option value="MMMM D, YYYY">MMMM D, YYYY (Long)</option>
+                            <option value="ddd, DD MMM YYYY">ddd, DD MMM YYYY</option>
+                            <option value="unix">Unix Timestamp (seconds)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="date-output-container">
+                <div class="input-group">
+                    <label for="output-format">Output Format:</label>
+                    <div class="select-wrapper">
+                        <select id="output-format" class="fancy-select">
+                            <option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</option>
+                            <option value="MM/DD/YYYY">MM/DD/YYYY (US)</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY (EU)</option>
+                            <option value="YYYY/MM/DD">YYYY/MM/DD</option>
+                            <option value="DD-MMM-YYYY">DD-MMM-YYYY</option>
+                            <option value="MMMM D, YYYY">MMMM D, YYYY (Long)</option>
+                            <option value="ddd, DD MMM YYYY">ddd, DD MMM YYYY</option>
+                            <option value="unix">Unix Timestamp (seconds)</option>
+                            <option value="relative">Relative Time</option>
+                            <option value="iso8601">ISO 8601</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button id="convert-date-btn" class="fancy-button"><i class="fas fa-exchange-alt"></i> Convert</button>
+                </div>
+            </div>
+            
+            <div class="date-result result-card">
+                <div id="date-result">Converted date will appear here</div>
+                <button id="copy-date-btn" class="icon-button" title="Copy to clipboard">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            
+            <div class="quick-dates">
+                <span class="quick-date-label">Quick inputs:</span>
+                <button class="quick-date-btn" data-value="now">Now</button>
+                <button class="quick-date-btn" data-value="tomorrow">Tomorrow</button>
+                <button class="quick-date-btn" data-value="yesterday">Yesterday</button>
+                <button class="quick-date-btn" data-value="next-week">Next Week</button>
+                <button class="quick-date-btn" data-value="last-month">Last Month</button>
+            </div>
+        </div>
+        
+        <div class="copy-notification" id="copy-notification">
+            <i class="fas fa-check-circle"></i> Copied to clipboard!
+        </div>
     </div>
-</nav>
-<!-- Page Content-->
-<div class="container-fluid p-0">
-    <!-- About-->
-    <section class="resume-section" id="about">
-        <div class="resume-section-content">
-            <h1 class="mb-0">
-                Pranay
-                <span class="text-primary">Raut</span>
-            </h1>
-            <div class="subheading mb-5">
-                Pune, Maharashtra
-                <a href="mailto:raut.pranay11@gmail.com">raut.pranay11@gmail.com</a>
+    <footer class="modern-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-info-circle"></i> About This Tool</h3>
+                <p>A modern generator and validator for International Bank Account Numbers (IBANs) and Universally Unique Identifiers (UUIDs).</p>
             </div>
-            <p class="lead mb-5">
-                With over 8 years of dedicated experience in software development, I have honed my skills and expertise
-                to become a seasoned professional in the field
-                Throughout my career, I have consistently demonstrated a strong commitment to delivering high-quality
-                software solutions and contributing to the success of various projects.
-                <br/><br/>You can download my resume clicking here:
-                or <a target="_blank" href="santiago.gonzalez.english.pdf">english</a></p>
-            <div class="social-icons">
-                <a class="social-icon" target="_blank"
-                   href="https://www.linkedin.com/in/santiago-gonz%C3%A1lez-courel-1237875a/"><i
-                        class="fab fa-linkedin-in"></i></a>
-                <a class="social-icon" target="_blank" href="https://pranayraut11.github.io/"><i
-                        class="fab fa-github"></i></a>
-                <a class="social-icon" target="_blank" href="https://medium.com/@raut.pranay11"><i
-                        class="fab fa-medium"></i></a>
-                <a class="social-icon" title="Spanish version" target="_blank" href="curriculum.pdf"><i
-                        class="fas fa-file-pdf"></i></a>
+            <div class="footer-section">
+                <h3><i class="fas fa-shield-alt"></i> Security Note</h3>
+                <p class="disclaimer">These are randomly generated IBANs not linked to real accounts. All processing happens in your browser - no data is sent to any server.</p>
             </div>
         </div>
-    </section>
-    <hr class="m-0"/>
-    <!-- Experience-->
-    <section class="resume-section" id="experience">
-        <div class="resume-section-content">
-            <h2 class="mb-5">Experience</h2>
-            <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                <div class="flex-grow-1">
-                    <h3 class="mb-0">Senior Software Developer</h3>
-                    <div class="subheading mb-3">Serrala</div>
-                    <p>
-                        Over the last four years, my professional journey has revolved around the strategic development
-                        and refinement of an advanced cloud-based payment solution and integrated cash management
-                        system.
-                        My role has been instrumental in harnessing cutting-edge technologies, including Java, Spring,
-                        MongoDB, Kafka, Kubernetes, etc to create a robust, scalable, and innovative financial
-                        technology platform.
-                </div>
-                <div class="flex-shrink-0"><span class="text-primary">June 2020 - Present</span></div>
-            </div>
-            <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                <div class="flex-grow-1">
-                    <h3 class="mb-0">Software Developer</h3>
-                    <div class="subheading mb-3">Cognizant</div>
-                    <p> I've experienced in blockchain technology, particularly Ethereum and Quorum with solidity smart
-                        contracts, collaborating within the Spring framework to
-                        conceptualize, develop, and execute innovative solutions for a document verification project.
-                    </p>
-                </div>
-                <div class="flex-shrink-0"><span class="text-primary">June 2018 - May 2020</span></div>
-            </div>
-            <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                <div class="flex-grow-1">
-                    <h3 class="mb-0">Software Developer</h3>
-                    <div class="subheading mb-3">ISynergy Tech Sys</div>
-                    <p>This was my debut in the IT sector.
-                        I worked on the project aimed at managing employees' skills and providing personalized
-                        suggestions for skill upgrades, using Spring MVC framework </p>
-                </div>
-                <div class="flex-shrink-0"><span class="text-primary">Dec 2015 - May 2018</span></div>
-            </div>
+        <div class="footer-bottom">
+            <p><i class="far fa-calendar-alt"></i> Created on: July 8, 2025 | <i class="fas fa-code"></i> For demonstration purposes only</p>
         </div>
-    </section>
-    <hr class="m-0"/>
-    <!-- Skills-->
-    <section class="resume-section" id="skills">
-        <div class="resume-section-content">
-            <h2 class="mb-5">Skills</h2>
-            <div class="subheading mb-3">Aptitudes</div>
-            <ul class="fa-ul mb-0">
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Experience in one or more programming languages like Java , Angular for frontend.
-                </li>
-
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Experience in software development life cycle (SDLC) including design, coding, testing, and
-                    deployment.
-                </li>
-
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Experience with relational databases (e.g., MySQL, PostgreSQL) and NoSQL databases (e.g., MongoDB).
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Knowledge and experience with cloud platforms (e.g.Azure).
-                    Deployment of applications on cloud infrastructure.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Familiarity with containerization (Docker) and container orchestration (Kubernetes).
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Implementing security measures in application development and infrastructure.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Experience in project management methodologies (Agile, Scrum).
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Analytical and problem-solving skills to troubleshoot complex issues.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Documenting code, processes, and system architectures.
-                </li>
-            </ul>
-            <br/>
-            <div class="subheading mb-3">Technical knowledge</div>
-            <ul class="fa-ul mb-0">
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Expertise in Spring Boot for creating microservices Java applications.
-                </li>
-
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Experience with Spring Data JPA for simplified data access using Java Persistence API.
-                </li>
-
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Strong understanding and practical experience in designing and development, including versioning,
-                    authentication, and documentation of RESTful APIs.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Expertise in event-driven architecture using Kafka for building scalable and resilient systems.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Proficient in NoSQL database design and implementation using MongoDB.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Design and implementation of data models using JPA annotations.
-                </li>
-                <li>
-                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                    Expertise in container orchestration and management using Kubernetes.
-                </li>
-            </ul>
-            <br/>
-        </div>
-    </section>
-    <hr class="m-0"/>
-    <!-- Education-->
-    <section class="resume-section" id="education">
-        <div class="resume-section-content">
-            <h2 class="mb-5">Education</h2>
-            <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                <div class="flex-grow-1">
-                    <h3 class="mb-0">University of Pune</h3>
-                    <div class="subheading mb-3">Master of Computer Applications</div>
-                </div>
-                <div class="flex-shrink-0"><span class="text-primary">Aug 2012 - June 2015</span></div>
-            </div>
-            <div class="d-flex flex-column flex-md-row justify-content-between">
-                <div class="flex-grow-1">
-                    <h3 class="mb-0">Sant Gadge Baba Amravati University</h3>
-                    <div class="subheading mb-3">Bachelor of Computer Applications.</div>
-                </div>
-                <div class="flex-shrink-0"><span class="text-primary">April 2009 - May 20012</span></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Interests-->
-<!--    <section class="resume-section" id="interests">-->
-<!--        <div class="resume-section-content">-->
-<!--            <h2 class="mb-5">Interests</h2>-->
-<!--            <p>Apart from being a IT Architect, I enjoy most of my time being outdoors. I enjoy cycling, in current year-->
-<!--                I have travelled over 7k kilometers. </p>-->
-<!--            <p class="mb-0">When I'm not cycing, I like to enjoy gastronomy (eating & cooking), listen to music (my-->
-<!--                favourite band is La Habitación Roja) and reading essays on classical or modern philosophy, new emerging-->
-<!--                technologies, etc.</p>-->
-<!--            <p>-->
-<!--                <iframe height='454' width='300' frameborder='0' allowtransparency='true' scrolling='no'-->
-<!--                        src='https://www.strava.com/athletes/32913091/latest-rides/894da51583130b4aa745d9f7085522f5d84ae691'></iframe>-->
-<!--            </p>-->
-<!--        </div>-->
-<!--    </section>-->
-<!--    <hr class="m-0"/>-->
-<!--    &lt;!&ndash; Awards&ndash;&gt;-->
-<!--    <section class="resume-section" id="awards">-->
-<!--        <div class="resume-section-content">-->
-<!--            <h2 class="mb-5">Certifications</h2>-->
-<!--            <ul class="fa-ul mb-0">-->
-<!--                <li>-->
-<!--                    <span class="fa-li"><i class="fas fa-trophy text-warning"></i></span>-->
-<!--                    Coursera :: Enterprise Architecture - <a-->
-<!--                        href="https://coursera.org/share/6ed5e7d389313b25dffe4cd7b087d2ac"-->
-<!--                        target="_blank">credential</a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <span class="fa-li"><i class="fas fa-trophy text-warning"></i></span>-->
-<!--                    PeopleCert :: ITIL 4 Specialist Direct, Plan and Improve - <a-->
-<!--                        href="https://candidate.peoplecert.org/MobileReports.aspx?id=F43D022933E6BDB24E8839662E5E93318059764637100414B5E29B43E8FD6E245FB6C690616FEBDCF146D75482586299B17502C9FA69920FAFBCAC17825C64BCF2FFF2B1664A6E09F394FEBDD7A1C887FB88E1218799E3B53FADD7535326CDFF166400B177A27F726899F47B3EBACF5CB3853117F484F3A3571C89E22908FC8E"-->
-<!--                        target="_blank">credential</a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <span class="fa-li"><i class="fas fa-trophy text-warning"></i></span>-->
-<!--                    PeopleCert :: ITIL 4 Specialist Create, Deliver and Support - <a-->
-<!--                        href="https://candidate.peoplecert.org/MobileReports.aspx?id=68494EE721B91488100F7DC6F9F8CCE2058202EC225A8C31A6F1AC872CDED3DB7679F7B2F585467C1ADF7DF49EB5EACBD8B72473739539C1A57CC28B3EABCC2D45724D8917B4403C1F8DC74B92BF34FC0D4419E95DDCFE1FD1AF12A5030533B2D34FC6ED"-->
-<!--                        target="_blank">credential</a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <span class="fa-li"><i class="fas fa-trophy text-warning"></i></span>-->
-<!--                    PeopleCert :: ITIL 4 Foundation Certificate in IT Service Management - <a-->
-<!--                        href="https://candidate.peoplecert.org/MobileReports.aspx?id=40A47E5AE86A7508A00F54FEC3C0B54D1F1ECC6C122A2904D7AA87E5DE87AB769F856D543B87A2C1A53D2A39A193907CDB6DC5F70E2DAB49E54CC4C0606E3A1C024A3AA145CDD7EE0A9115E3AB96572ED2D2D6899EBF9B82F827A4FDAD94389B8A369A0E"-->
-<!--                        target="_blank">credential</a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <span class="fa-li"><i class="fas fa-trophy text-warning"></i></span>-->
-<!--                    Coursera :: Hadoop Platform and Application Framework-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <span class="fa-li"><i class="fas fa-trophy text-warning"></i></span>-->
-<!--                    Coursera :: Introduction to Big Data - <a-->
-<!--                        href="https://www.coursera.org/account/accomplishments/certificate/PKY6BYSARY9E"-->
-<!--                        target="_blank">credential</a>-->
-<!--                </li>-->
-<!--            </ul>-->
-<!--        </div>-->
-<!--    </section>-->
-</div>
-<!-- Bootstrap core JS-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
-<!-- Third party plugin JS-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-<!-- Core theme JS-->
-<script src="js/scripts.js"></script>
+    </footer>
+    <script src="js/script-fixed.js"></script>
 </body>
 </html>

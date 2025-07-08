@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter Test</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="site-header">
+            <h1>JSON Formatter Test</h1>
+        </header>
+        
+        <div class="json-tools-container card-container">
+            <div class="json-input-container">
+                <textarea id="json-input" class="json-textarea" placeholder="Paste your JSON here..."></textarea>
+                <div class="json-controls">
+                    <button id="format-json-btn" class="fancy-button"><i class="fas fa-indent"></i> Format JSON</button>
+                    <button id="minify-json-btn" class="fancy-button purple"><i class="fas fa-compress-arrows-alt"></i> Minify</button>
+                    <button id="clear-json-btn" class="fancy-button red"><i class="fas fa-trash-alt"></i> Clear</button>
+                    <button id="sample-json-btn" class="fancy-button green"><i class="fas fa-lightbulb"></i> Sample</button>
+                </div>
+                <div class="json-options">
+                    <label class="fancy-checkbox">
+                        <input type="checkbox" id="indent-with-tabs" checked>
+                        <span class="checkbox-indicator"></span>
+                        <span class="checkbox-label">Indent with Tabs</span>
+                    </label>
+                    <div class="space-input-container">
+                        <label for="indent-spaces">Spaces:</label>
+                        <input type="number" id="indent-spaces" min="1" max="8" value="2" class="indent-spaces-input">
+                    </div>
+                </div>
+            </div>
+            <div class="json-output-container">
+                <div class="json-output" id="json-output">
+                    <div class="json-output-placeholder">Formatted JSON will appear here</div>
+                </div>
+                <button id="copy-json-btn" class="fancy-button"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+        
+        <div class="copy-notification" id="copy-notification">
+            <i class="fas fa-check-circle"></i> Copied to clipboard!
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get JSON formatter elements
+        const jsonInput = document.getElementById('json-input');
+        const jsonOutput = document.getElementById('json-output');
+        const formatJsonBtn = document.getElementById('format-json-btn');
+        const minifyJsonBtn = document.getElementById('minify-json-btn');
+        const clearJsonBtn = document.getElementById('clear-json-btn');
+        const copyJsonBtn = document.getElementById('copy-json-btn');
+        const indentWithTabs = document.getElementById('indent-with-tabs');
+        const indentSpaces = document.getElementById('indent-spaces');
+        const sampleJsonBtn = document.getElementById('sample-json-btn');
+        const copyNotification = document.getElementById('copy-notification');
+        
+        console.log('Elements loaded:', {
+            jsonInput, jsonOutput, formatJsonBtn, minifyJsonBtn, 
+            clearJsonBtn, copyJsonBtn, indentWithTabs, indentSpaces, sampleJsonBtn
+        });
+        
+        // Function to syntax highlight JSON
+        function syntaxHighlightJson(json) {
+            if (!json) return '';
+            
+            // First escape HTML entities to prevent XSS
+            let escapedJson = json.replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;');
+            
+            // Apply syntax highlighting with color spans
+            let highlighted = escapedJson.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                        // Remove the colon for the key
+                        match = match.replace(/:$/, '') + '<span style="color: inherit;">:</span>';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+            
+            // Wrap in a pre tag to properly preserve whitespace
+            return '<pre class="json-formatted">' + highlighted + '</pre>';
+        }
+        
+        // Function to format JSON
+        function formatJson() {
+            console.log('Format JSON function called');
+            try {
+                const input = jsonInput.value.trim();
+                
+                if (!input) {
+                    jsonOutput.innerHTML = '<div class="json-output-placeholder">Please enter JSON to format</div>';
+                    return;
+                }
+                
+                // Parse the JSON to validate it
+                const parsedJson = JSON.parse(input);
+                
+                // Get indentation settings
+                const useTab = indentWithTabs.checked;
+                const spaces = parseInt(indentSpaces.value) || 2;
+                const indentation = useTab ? '\t' : ' '.repeat(spaces);
+                
+                // Format the JSON
+                const formattedJson = JSON.stringify(parsedJson, null, indentation);
+                
+                // Apply syntax highlighting and display
+                jsonOutput.innerHTML = syntaxHighlightJson(formattedJson);
+                
+                // Show success message
+                showJsonMessage('JSON formatted successfully!', 'success');
+            } catch (error) {
+                // Show error message
+                jsonOutput.innerHTML = `<div style="color: #e74c3c;">Error: ${error.message}</div>`;
+                showJsonMessage('Invalid JSON!', 'error');
+            }
+        }
+        
+        // Function to minify JSON
+        function minifyJson() {
+            console.log('Minify JSON function called');
+            try {
+                const input = jsonInput.value.trim();
+                
+                if (!input) {
+                    jsonOutput.innerHTML = '<div class="json-output-placeholder">Please enter JSON to minify</div>';
+                    return;
+                }
+                
+                // Parse the JSON to validate it
+                const parsedJson = JSON.parse(input);
+                
+                // Minify the JSON
+                const minifiedJson = JSON.stringify(parsedJson);
+                
+                // Apply syntax highlighting and display
+                jsonOutput.innerHTML = syntaxHighlightJson(minifiedJson);
+                
+                // Show success message
+                showJsonMessage('JSON minified successfully!', 'success');
+            } catch (error) {
+                // Show error message
+                jsonOutput.innerHTML = `<div style="color: #e74c3c;">Error: ${error.message}</div>`;
+                showJsonMessage('Invalid JSON!', 'error');
+            }
+        }
+        
+        // Function to clear JSON
+        function clearJson() {
+            console.log('Clear JSON function called');
+            jsonInput.value = '';
+            jsonOutput.innerHTML = '<div class="json-output-placeholder">Formatted JSON will appear here</div>';
+        }
+        
+        // Function to copy formatted JSON
+        function copyJson() {
+            console.log('Copy JSON function called');
+            const content = jsonOutput.textContent;
+            
+            if (content && content !== 'Formatted JSON will appear here') {
+                navigator.clipboard.writeText(content)
+                    .then(() => {
+                        // Show notification
+                        copyNotification.classList.add('show');
+                        
+                        // Hide notification after 2 seconds
+                        setTimeout(() => {
+                            copyNotification.classList.remove('show');
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy JSON to clipboard');
+                    });
+            }
+        }
+        
+        // Function to show JSON message
+        function showJsonMessage(message, type) {
+            console.log('Show message:', message, type);
+            const messageEl = document.createElement('div');
+            messageEl.className = `json-message ${type}`;
+            messageEl.textContent = message;
+            
+            // Add message to the DOM
+            jsonOutput.parentNode.insertBefore(messageEl, jsonOutput);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                messageEl.remove();
+            }, 3000);
+        }
+        
+        // Function to insert sample JSON
+        function insertSampleJson() {
+            console.log('Insert sample JSON function called');
+            // Sample JSON with various data types
+            const sampleJson = {
+                "app": "JSON Formatter Test",
+                "version": "1.0",
+                "features": [
+                    "Format JSON",
+                    "Minify JSON",
+                    "Syntax Highlighting"
+                ],
+                "options": {
+                    "indent": true,
+                    "spaces": 2,
+                    "allowComments": false
+                },
+                "performance": {
+                    "formatTime": 0.032,
+                    "minifyTime": 0.012
+                }
+            };
+            
+            // Insert sample JSON with 2 space indentation
+            jsonInput.value = JSON.stringify(sampleJson, null, 2);
+            
+            // Format it to show the result
+            formatJson();
+        }
+        
+        // Event listeners for JSON formatter buttons
+        formatJsonBtn.addEventListener('click', () => {
+            console.log('Format button clicked');
+            formatJson();
+        });
+        
+        minifyJsonBtn.addEventListener('click', () => {
+            console.log('Minify button clicked');
+            minifyJson();
+        });
+        
+        clearJsonBtn.addEventListener('click', () => {
+            console.log('Clear button clicked');
+            clearJson();
+        });
+        
+        copyJsonBtn.addEventListener('click', () => {
+            console.log('Copy button clicked');
+            copyJson();
+        });
+        
+        sampleJsonBtn.addEventListener('click', () => {
+            console.log('Sample button clicked');
+            insertSampleJson();
+        });
+        
+        // Format on Ctrl+Enter or Cmd+Enter
+        jsonInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                formatJson();
+            }
+        });
+        
+        // Toggle tabs/spaces input visibility
+        indentWithTabs.addEventListener('change', () => {
+            document.querySelector('.space-input-container').style.display = 
+                indentWithTabs.checked ? 'none' : 'flex';
+        });
+        
+        // Initialize spaces input visibility
+        document.querySelector('.space-input-container').style.display = 
+            indentWithTabs.checked ? 'none' : 'flex';
+            
+        console.log('All event listeners added');
+    });
+    </script>
+</body>
+</html>
