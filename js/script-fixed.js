@@ -410,15 +410,19 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Date converter elements found");
         
         // Load date-fns library dynamically
-        const dateFnsScript = document.createElement('script');
-        dateFnsScript.src = 'https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js';
-        dateFnsScript.onload = function() {
-            console.log('date-fns library loaded');
-        };
-        document.head.appendChild(dateFnsScript);
+        // Create a promise to track when date-fns library is loaded
+        const dateFnsLoaded = new Promise((resolve) => {
+            const dateFnsScript = document.createElement('script');
+            dateFnsScript.src = 'https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js';
+            dateFnsScript.onload = function() {
+                console.log('date-fns library loaded');
+                resolve(true);
+            };
+            document.head.appendChild(dateFnsScript);
+        });
         
         // Function to convert date
-        function convertDate() {
+        async function convertDate() {
             try {
                 const input = inputDate.value.trim();
                 
@@ -430,11 +434,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 let date;
                 const inFormat = inputFormat.value;
                 
+                // Wait for date-fns to be loaded
+                let dateFnsAvailable = false;
+                try {
+                    // Wait for the library to load with a timeout
+                    await Promise.race([
+                        dateFnsLoaded.then(() => true),
+                        new Promise(resolve => setTimeout(() => resolve(false), 2000)) // 2-second timeout
+                    ]).then(result => {
+                        dateFnsAvailable = result && typeof dateFns !== 'undefined';
+                    });
+                } catch (e) {
+                    console.log("Error waiting for date-fns to load:", e);
+                    dateFnsAvailable = typeof dateFns !== 'undefined';
+                }
+                
                 // Parse input date based on selected format
                 if (inFormat === 'unix') {
                     // Unix timestamp (seconds since epoch)
                     date = new Date(parseInt(input) * 1000);
-                } else if (typeof dateFns !== 'undefined') {
+                } else if (dateFnsAvailable) {
                     // Use date-fns parse with selected format
                     const formatString = getFormatString(inFormat);
                     try {
@@ -459,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const outFormat = outputFormat.value;
                 let result;
                 
-                if (typeof dateFns !== 'undefined') {
+                if (dateFnsAvailable) {
                     // Use date-fns format
                     if (outFormat === 'unix') {
                         result = Math.floor(date.getTime() / 1000).toString();
@@ -514,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Function to handle quick date inputs
+        // Function to set a quick date and trigger conversion
         function setQuickDate(value) {
             let date;
             const now = new Date();
@@ -538,6 +557,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'last-month':
                     date = new Date(now);
                     date.setMonth(date.getMonth() - 1);
+                    break;
+            }
+            
+            // Set the input date to ISO format and convert
+            inputDate.value = date.toISOString().split('T')[0];
+            inputFormat.value = 'YYYY-MM-DD'; // ISO format
+            convertDate(); // Call the async function
+        }
+        }
                     break;
             }
             
@@ -601,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Add event listeners for date converter
-        convertDateBtn.addEventListener('click', convertDate);
+        convertDateBtn.addEventListener('click', () => convertDate());
         copyDateBtn.addEventListener('click', copyDate);
         
         // Add event listeners for quick date buttons
