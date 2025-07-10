@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter - Developer Toolkit</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="css/compact-styles.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <meta name="description" content="Format, prettify, and validate JSON with syntax highlighting for better readability">
+    <meta name="theme-color" content="#3498db">
+</head>
+<body>
+    <div class="container">
+        <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        
+        <header class="site-header">
+            <h1><i class="fas fa-code"></i> JSON Formatter</h1>
+            <p class="tagline">Format, prettify, and validate JSON with syntax highlighting</p>
+        </header>
+        
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="iban.html" class="nav-link"><i class="fas fa-university"></i> IBAN</a>
+            <a href="uuid.html" class="nav-link"><i class="fas fa-fingerprint"></i> UUID</a>
+            <a href="json.html" class="nav-link"><i class="fas fa-code"></i> JSON</a>
+            <a href="date.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Date</a>
+        </nav>
+        
+        <div class="json-tools-container card-container">
+            <div class="json-input-container">
+                <textarea id="json-input" class="json-textarea" placeholder="Paste your JSON here..."></textarea>
+                <div class="json-controls">
+                    <button id="format-json-btn" class="fancy-button"><i class="fas fa-indent"></i> Format</button>
+                    <button id="minify-json-btn" class="fancy-button purple"><i class="fas fa-compress-arrows-alt"></i> Minify</button>
+                    <button id="clear-json-btn" class="fancy-button red"><i class="fas fa-trash-alt"></i> Clear</button>
+                    <button id="sample-json-btn" class="fancy-button green"><i class="fas fa-lightbulb"></i> Sample</button>
+                </div>
+                <div class="json-options">
+                    <label class="fancy-checkbox">
+                        <input type="checkbox" id="indent-with-tabs" checked>
+                        <span class="checkbox-indicator"></span>
+                        <span class="checkbox-label">Tabs</span>
+                    </label>
+                    <div class="space-input-container">
+                        <label for="indent-spaces">Spaces:</label>
+                        <input type="number" id="indent-spaces" min="1" max="8" value="2" class="indent-spaces-input">
+                    </div>
+                </div>
+            </div>
+            <div class="json-output-container">
+                <div class="json-output" id="json-output">
+                    <div class="json-output-placeholder">Formatted JSON will appear here</div>
+                </div>
+                <button id="copy-json-btn" class="fancy-button"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+        
+        <div class="copy-notification" id="copy-notification">
+            <i class="fas fa-check-circle"></i> Copied to clipboard!
+        </div>
+    </div>
+    
+    <footer class="modern-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-info-circle"></i> About</h3>
+                <p>This toolkit provides various utilities for developers and financial professionals to streamline common tasks.</p>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-code"></i> Technologies</h3>
+                <p>Built with vanilla JavaScript, CSS, and HTML for maximum performance and compatibility.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="js/common.js"></script>
+    <script src="js/json.js"></script>
+</body>
+</html>

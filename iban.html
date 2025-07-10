@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBAN Generator & Validator - Developer Toolkit</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="css/compact-styles.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link rel="stylesheet" href="css/iban.css">
+    <meta name="description" content="Generate and validate International Bank Account Numbers (IBANs) for different countries">
+    <meta name="theme-color" content="#3498db">
+</head>
+<body>
+    <div class="container">
+        <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        
+        <header class="site-header">
+            <h1><i class="fas fa-university"></i> IBAN Tools</h1>
+            <p class="tagline">Generate and validate International Bank Account Numbers</p>
+        </header>
+        
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="iban.html" class="nav-link"><i class="fas fa-university"></i> IBAN</a>
+            <a href="uuid.html" class="nav-link"><i class="fas fa-fingerprint"></i> UUID</a>
+            <a href="json.html" class="nav-link"><i class="fas fa-code"></i> JSON</a>
+            <a href="date.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Date</a>
+        </nav>
+        
+        <div class="iban-container card-container">
+            <div class="tab-content" id="generator-content">
+                <div class="iban-info">
+                    <h3><i class="fas fa-info-circle"></i> About IBAN</h3>
+                    <p>An International Bank Account Number (IBAN) is a standardized international numbering system for bank accounts that allows for efficient and accurate cross-border transactions.</p>
+                </div>
+                
+                <div class="country-selection-prompt" id="country-selection-prompt">
+                    <i class="fas fa-info-circle"></i> Please select a country to generate an IBAN
+                </div>
+                
+                <div class="country-grid" id="country-grid">
+                    <button class="country-button selected" data-country="DE" data-region="Europe" data-popular="true"><span>DE</span> Germany</button>
+                    <button class="country-button" data-country="FR" data-region="Europe" data-popular="true"><span>FR</span> France</button>
+                    <button class="country-button" data-country="GB" data-region="Europe" data-popular="true"><span>GB</span> UK</button>
+                    <button class="country-button" data-country="IT" data-region="Europe" data-popular="true"><span>IT</span> Italy</button>
+                    <button class="country-button" data-country="ES" data-region="Europe" data-popular="true"><span>ES</span> Spain</button>
+                    <button class="country-button" data-country="NL" data-region="Europe"><span>NL</span> Netherlands</button>
+                    <button class="country-button" data-country="AT" data-region="Europe"><span>AT</span> Austria</button>
+                    <button class="country-button" data-country="BE" data-region="Europe"><span>BE</span> Belgium</button>
+                    <button class="country-button" data-country="CH" data-region="Europe"><span>CH</span> Switzerland</button>
+                    <button class="country-button" data-country="SE" data-region="Europe"><span>SE</span> Sweden</button>
+                    <button class="country-button" data-country="FI" data-region="Europe"><span>FI</span> Finland</button>
+                    <button class="country-button" data-country="DK" data-region="Europe"><span>DK</span> Denmark</button>
+                    <button class="country-button" data-country="IE" data-region="Europe"><span>IE</span> Ireland</button>
+                    <button class="country-button" data-country="PL" data-region="Europe"><span>PL</span> Poland</button>
+                    <button class="country-button" data-country="PT" data-region="Europe"><span>PT</span> Portugal</button>
+                </div>
+                
+                <div class="iban-format-info" id="format-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="format-text">Germany IBAN format: DE00 0000 0000 0000 0000 00 (22 characters)</span>
+                </div>
+                
+                <div class="input-container">
+                    <div class="input-group">
+                        <label for="bank-code"><i class="fas fa-university"></i> Bank Code: <span class="optional-label">(Optional)</span></label>
+                        <input type="text" id="bank-code" class="fancy-input" placeholder="8 digits">
+                        <div class="input-help" id="bank-code-help">Enter the bank code or leave empty for random generation</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="account-number"><i class="fas fa-user"></i> Account Number: <span class="optional-label">(Optional)</span></label>
+                        <input type="text" id="account-number" class="fancy-input" placeholder="Up to 10 digits">
+                        <div class="input-help" id="account-number-help">Enter the account number or leave empty for random generation</div>
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button id="generate-iban-btn" class="fancy-button primary-button"><i class="fas fa-cog"></i> Generate IBAN</button>
+                    <button id="copy-iban-btn" class="fancy-button secondary-button"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                
+                <div class="result-card">
+                    <div id="iban-result">Generated IBAN will appear here</div>
+                </div>
+                
+                <hr class="section-divider">
+                
+                <div class="iban-info">
+                    <h3><i class="fas fa-check-circle"></i> IBAN Validation</h3>
+                    <p>Verify if an IBAN is correctly formatted and passes the checksum validation algorithm.</p>
+                </div>
+                
+                <div class="input-container">
+                    <div class="input-group full-width">
+                        <label for="iban-to-validate"><i class="fas fa-key"></i> IBAN to Validate:</label>
+                        <input type="text" id="iban-to-validate" class="fancy-input" placeholder="Enter IBAN to validate (spaces optional)">
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button id="validate-iban-btn" class="fancy-button primary-button"><i class="fas fa-check-circle"></i> Validate IBAN</button>
+                </div>
+                
+                <div class="validation-result hidden" id="validation-result">
+                    <div class="validation-header">
+                        <span id="validation-icon"><i class="fas fa-circle-notch fa-spin"></i></span>
+                        <span id="validation-status">Validating...</span>
+                    </div>
+                    <div class="validation-details" id="validation-details">
+                        <!-- Validation details will be populated here -->
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="copy-notification" id="copy-notification">
+            <i class="fas fa-check-circle"></i> Copied to clipboard!
+        </div>
+    </div>
+    
+    <footer class="modern-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-info-circle"></i> About</h3>
+                <p>This toolkit provides various utilities for developers and financial professionals to streamline common tasks.</p>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-code"></i> Technologies</h3>
+                <p>Built with vanilla JavaScript, CSS, and HTML for maximum performance and compatibility.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="js/common.js"></script>
+    <script src="js/iban.js"></script>
+</body>
+</html>

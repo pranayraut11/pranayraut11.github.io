@@ -1,33 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM loaded - initializing scripts");
     
+    // Debounce function to limit how often a function can be called
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+    
+    // Log errors to help debug DOM element issues
+    function logError(message) {
+        console.error(`ERROR: ${message}`);
+    }
+    
+    // Element initialization helper
+    function getElement(id, required = false) {
+        const element = document.getElementById(id);
+        if (!element && required) {
+            logError(`Required element not found: ${id}`);
+        }
+        return element;
+    }
+    
     // Theme toggle elements
-    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggle = getElement('theme-toggle');
     const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
     
     // Generator and tab elements
-    const generatorTab = document.getElementById('generator-tab');
-    const validatorTab = document.getElementById('validator-tab');
-    const generatorContent = document.getElementById('generator-content');
-    const validatorContent = document.getElementById('validator-content');
-    const validateGeneratedLink = document.getElementById('validate-generated-link');
-    const generateNewLink = document.getElementById('generate-new-link');
+    const generatorTab = getElement('generator-tab');
+    const validatorTab = getElement('validator-tab');
+    const generatorContent = getElement('generator-content');
+    const validatorContent = getElement('validator-content');
+    const validateGeneratedLink = getElement('validate-generated-link');
+    const generateNewLink = getElement('generate-new-link');
     
-    const generateBtn = document.getElementById('generate-btn');
-    const ibanResult = document.getElementById('iban-result');
-    const copyBtn = document.getElementById('copy-btn');
-    const copyNotification = document.getElementById('copy-notification');
-    const countrySelect = document.getElementById('country-select');
+    const generateBtn = getElement('generate-btn');
+    const ibanResult = getElement('iban-result');
+    const copyBtn = getElement('copy-btn');
+    const copyNotification = getElement('copy-notification');
+    const countrySelect = getElement('country-select');
     
     // IBAN validator elements
-    const ibanToValidate = document.getElementById('iban-to-validate');
-    const validateIbanBtn = document.getElementById('validate-iban-btn');
-    const validationResult = document.getElementById('validation-result');
+    const ibanToValidate = getElement('iban-to-validate', true);
+    const validateIbanBtn = getElement('validate-iban-btn', true);
+    const validationResult = getElement('validation-result', true);
     const validationMessage = validationResult ? validationResult.querySelector('.validation-message') : null;
-    const ibanCountryDetail = document.getElementById('iban-country');
-    const ibanLengthDetail = document.getElementById('iban-length');
-    const ibanFormatDetail = document.getElementById('iban-format');
-    const ibanCheckDigitsDetail = document.getElementById('iban-check-digits');
+    const ibanCountryDetail = getElement('iban-country');
+    const ibanLengthDetail = getElement('iban-length');
+    const ibanFormatDetail = getElement('iban-format');
+    const ibanCheckDigitsDetail = getElement('iban-check-digits');
+    
+    console.log("IBAN validator elements initialization:");
+    console.log("- ibanToValidate:", ibanToValidate);
+    console.log("- validateIbanBtn:", validateIbanBtn);
+    console.log("- validationResult:", validationResult);
+    console.log("- validationMessage:", validationMessage);
     
     // UUID generator elements
     const generateUuidBtn = document.getElementById('generate-uuid-btn');
@@ -319,7 +350,46 @@ document.addEventListener('DOMContentLoaded', () => {
                         result = date.toISOString();
                     } else {
                         const formatString = getFormatString(outFormat);
-                        result = dateFns.format(date, formatString);
+                        console.log("Formatting date with format:", outFormat, "format string:", formatString);
+                        
+                        // Special logging for day name formats
+                        if (outFormat === 'ddd, DD MMM YYYY') {
+                            console.log("Date object day:", date.getDay(), "Date object:", date);
+                            try {
+                                // Test different ways to get day of week
+                                console.log("Testing different day formats:");
+                                if (typeof dateFns.format === 'function') {
+                                    console.log("- iii format:", dateFns.format(date, 'iii'));
+                                    console.log("- EEE format:", dateFns.format(date, 'EEE'));
+                                    console.log("- iiii format:", dateFns.format(date, 'iiii'));
+                                    console.log("- EEEE format:", dateFns.format(date, 'EEEE'));
+                                }
+                            } catch (e) {
+                                console.warn("Error testing day formats:", e);
+                            }
+                        }
+                        
+                        try {
+                            result = dateFns.format(date, formatString);
+                            console.log("Formatted result:", result);
+                        } catch (e) {
+                            console.error("Error formatting date:", e);
+                            // Fallback to a simpler formatting
+                            if (outFormat === 'DD-MMM-YYYY') {
+                                // Custom fallback for DD-MMM-YYYY format
+                                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                result = `${date.getDate().toString().padStart(2, '0')}-${months[date.getMonth()]}-${date.getFullYear()}`;
+                                console.log("Using custom fallback for DD-MMM-YYYY:", result);
+                            } else if (outFormat === 'ddd, DD MMM YYYY') {
+                                // Custom fallback for ddd, DD MMM YYYY format
+                                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                result = `${days[date.getDay()]}, ${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;
+                                console.log("Using custom fallback for ddd, DD MMM YYYY:", result);
+                            } else {
+                                result = date.toLocaleDateString();
+                            }
+                        }
                     }
                 } else {
                     // Simple fallback formatting
@@ -333,6 +403,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         result = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
                     } else if (outFormat === 'DD/MM/YYYY') {
                         result = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+                    } else if (outFormat === 'DD-MMM-YYYY') {
+                        // Custom handling for DD-MMM-YYYY format
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        result = `${date.getDate().toString().padStart(2, '0')}-${months[date.getMonth()]}-${date.getFullYear()}`;
+                    } else if (outFormat === 'ddd, DD MMM YYYY') {
+                        // Custom handling for ddd, DD MMM YYYY format
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        result = `${days[date.getDay()]}, ${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;
                     } else {
                         result = date.toLocaleDateString();
                     }
@@ -357,9 +436,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'MM/DD/YYYY': return 'MM/dd/yyyy';
                 case 'DD/MM/YYYY': return 'dd/MM/yyyy';
                 case 'YYYY/MM/DD': return 'yyyy/MM/dd';
-                case 'DD-MMM-YYYY': return 'dd-MMM-yyyy';
+                case 'DD-MMM-YYYY': return 'dd-LLL-yyyy';  // Using LLL for abbreviated month name
                 case 'MMMM D, YYYY': return 'MMMM d, yyyy';
-                case 'ddd, DD MMM YYYY': return 'EEE, dd MMM yyyy';
+                case 'ddd, DD MMM YYYY': return 'iii, dd LLL yyyy';  // Using iii for abbreviated day name
                 default: return 'yyyy-MM-dd';
             }
         }
@@ -438,6 +517,25 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Setting up date converter event listeners");
         convertDateBtn.addEventListener('click', convertDate);
         copyDateBtn.addEventListener('click', copyDate);
+        
+        // Auto-convert when input or format changes
+        inputDate.addEventListener('input', debounce(() => {
+            if (inputDate.value.trim().length > 2) {
+                convertDate();
+            }
+        }, 500));
+        
+        inputFormat.addEventListener('change', () => {
+            if (inputDate.value.trim()) {
+                convertDate();
+            }
+        });
+        
+        outputFormat.addEventListener('change', () => {
+            if (inputDate.value.trim()) {
+                convertDate();
+            }
+        });
         
         // Add event listeners for quick date buttons
         quickDateBtns.forEach(btn => {
@@ -861,148 +959,243 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log("Script initialization complete");
     
+    // Initialize IBAN validator
+    initializeIbanValidator();
+    
     // IBAN Validator functionality
-    if (validateIbanBtn && ibanToValidate && validationResult) {
+    function initializeIbanValidator() {
+        console.log("Initializing IBAN validator...");
+        
+        // Get all needed elements
+        const ibanToValidate = getElement('iban-to-validate');
+        const validateIbanBtn = getElement('validate-iban-btn');
+        const validationResult = getElement('validation-result');
+        
+        // Exit if essential elements are missing
+        if (!ibanToValidate || !validateIbanBtn || !validationResult) {
+            console.error("Essential IBAN validator elements missing - aborting initialization");
+            return;
+        }
+        
         console.log("IBAN validator elements found");
+        
+        // Define IBAN structure for validator (independent of generator)
+        const ibanStructure = {
+            'AT': { length: 20, format: 'AT00 0000 0000 0000 0000', bban: '16n' },
+            'BE': { length: 16, format: 'BE00 0000 0000 0000', bban: '12n' },
+            'BG': { length: 22, format: 'BG00 AAAA 0000 0000 0000 00', bban: '4a,6n,8c' },
+            'CH': { length: 21, format: 'CH00 0000 0000 0000 0000 0', bban: '5n,12c' },
+            'CZ': { length: 24, format: 'CZ00 0000 0000 0000 0000 0000', bban: '20n' },
+            'DE': { length: 22, format: 'DE00 0000 0000 0000 0000 00', bban: '18n' },
+            'DK': { length: 18, format: 'DK00 0000 0000 0000 00', bban: '14n' },
+            'ES': { length: 24, format: 'ES00 0000 0000 0000 0000 0000', bban: '20n' },
+            'FI': { length: 18, format: 'FI00 0000 0000 0000 00', bban: '14n' },
+            'FR': { length: 27, format: 'FR00 0000 0000 0000 0000 0000 000', bban: '10n,11c,2n' },
+            'GB': { length: 22, format: 'GB00 AAAA 0000 0000 0000 00', bban: '4a,14n' },
+            'GR': { length: 27, format: 'GR00 0000 0000 0000 0000 0000 000', bban: '7n,16c' },
+            'HR': { length: 21, format: 'HR00 0000 0000 0000 0000 0', bban: '17n' },
+            'HU': { length: 28, format: 'HU00 0000 0000 0000 0000 0000 0000', bban: '24n' },
+            'IE': { length: 22, format: 'IE00 AAAA 0000 0000 0000 00', bban: '4a,14n' },
+            'IT': { length: 27, format: 'IT00 A000 0000 0000 0000 0000 000', bban: '1a,10n,12c' },
+            'LT': { length: 20, format: 'LT00 0000 0000 0000 0000', bban: '16n' },
+            'LU': { length: 20, format: 'LU00 0000 0000 0000 0000', bban: '3n,13c' },
+            'LV': { length: 21, format: 'LV00 AAAA 0000 0000 0000 0', bban: '4a,13c' },
+            'MT': { length: 31, format: 'MT00 AAAA 0000 0000 0000 0000 0000 000', bban: '4a,5n,18c' },
+            'NL': { length: 18, format: 'NL00 AAAA 0000 0000 00', bban: '4a,10n' },
+            'PL': { length: 28, format: 'PL00 0000 0000 0000 0000 0000 0000', bban: '24n' },
+            'PT': { length: 25, format: 'PT00 0000 0000 0000 0000 0000 0', bban: '21n' },
+            'RO': { length: 24, format: 'RO00 AAAA 0000 0000 0000 0000', bban: '4a,16c' },
+            'SE': { length: 24, format: 'SE00 0000 0000 0000 0000 0000', bban: '20n' },
+            'SI': { length: 19, format: 'SI00 0000 0000 0000 000', bban: '15n' },
+            'SK': { length: 24, format: 'SK00 0000 0000 0000 0000 0000', bban: '20n' }
+        };
+        
+        // Country names for validator
+        const countryNames = {
+            'AT': 'Austria', 'BE': 'Belgium', 'BG': 'Bulgaria', 'CH': 'Switzerland',
+            'CZ': 'Czech Republic', 'DE': 'Germany', 'DK': 'Denmark', 'ES': 'Spain',
+            'FI': 'Finland', 'FR': 'France', 'GB': 'United Kingdom', 'GR': 'Greece',
+            'HR': 'Croatia', 'HU': 'Hungary', 'IE': 'Ireland', 'IT': 'Italy',
+            'LT': 'Lithuania', 'LU': 'Luxembourg', 'LV': 'Latvia', 'MT': 'Malta',
+            'NL': 'Netherlands', 'PL': 'Poland', 'PT': 'Portugal', 'RO': 'Romania',
+            'SE': 'Sweden', 'SI': 'Slovenia', 'SK': 'Slovakia'
+        };
+        
+        // Function to validate an IBAN with detailed results
+        function validateIBANWithDetails(iban) {
+            // Remove spaces and convert to uppercase
+            iban = iban.replace(/\s/g, '').toUpperCase();
+            
+            // Basic format check: length and country code
+            if (iban.length < 5) {
+                return {
+                    isValid: false,
+                    message: 'IBAN is too short',
+                    details: {
+                        country: 'Unknown',
+                        length: iban.length,
+                        format: 'Invalid',
+                        checkDigits: 'Invalid'
+                    }
+                };
+            }
+            
+            const countryCode = iban.substring(0, 2);
+            const structure = ibanStructure[countryCode];
+            
+            // Check if country code is valid
+            if (!structure) {
+                return {
+                    isValid: false,
+                    message: 'Invalid country code',
+                    details: {
+                        country: 'Unknown (' + countryCode + ')',
+                        length: iban.length,
+                        format: 'Invalid',
+                        checkDigits: 'Invalid'
+                    }
+                };
+            }
+            
+            // Check length
+            if (iban.length !== structure.length) {
+                return {
+                    isValid: false,
+                    message: `IBAN length incorrect (should be ${structure.length} characters)`,
+                    details: {
+                        country: countryNames[countryCode] || countryCode,
+                        length: `${iban.length} (should be ${structure.length})`,
+                        format: 'Invalid length',
+                        checkDigits: 'Not checked'
+                    }
+                };
+            }
+            
+            // Character validation (only A-Z, 0-9 allowed)
+            if (!/^[A-Z0-9]+$/.test(iban)) {
+                return {
+                    isValid: false,
+                    message: 'IBAN contains invalid characters',
+                    details: {
+                        country: countryNames[countryCode] || countryCode,
+                        length: iban.length,
+                        format: 'Invalid characters',
+                        checkDigits: 'Not checked'
+                    }
+                };
+            }
+            
+            // Check digits validation (MOD 97-10)
+            const checkDigits = iban.substring(2, 4);
+            
+            // Rearrange and convert to numeric
+            let rearranged = iban.substring(4) + iban.substring(0, 4);
+            let numerical = '';
+            
+            for (let i = 0; i < rearranged.length; i++) {
+                let char = rearranged.charAt(i);
+                if (/[A-Z]/.test(char)) {
+                    numerical += (char.charCodeAt(0) - 55);
+                } else {
+                    numerical += char;
+                }
+            }
+            
+            // Calculate remainder
+            let remainder = 0;
+            for (let i = 0; i < numerical.length; i++) {
+                remainder = (remainder * 10 + parseInt(numerical.charAt(i))) % 97;
+            }
+            
+            const isValidChecksum = remainder === 1;
+            
+            return {
+                isValid: isValidChecksum,
+                message: isValidChecksum ? 'IBAN is valid' : 'Invalid check digits',
+                details: {
+                    country: countryNames[countryCode] || countryCode,
+                    length: `${iban.length} (correct)`,
+                    format: structure.format || 'Valid format',
+                    checkDigits: isValidChecksum ? 'Valid' : 'Invalid'
+                }
+            };
+        }
         
         // Handle IBAN validation
         function handleIBANValidation() {
+            console.log("Validating IBAN...");
+            
             const iban = ibanToValidate.value.trim();
+            console.log("IBAN to validate:", iban);
+            
             if (!iban) {
                 showNotification('Please enter an IBAN to validate', 'error');
                 return;
             }
             
             try {
-                // Function to validate an IBAN with detailed results
-                function validateIBANWithDetails(iban) {
-                    // Remove spaces and convert to uppercase
-                    iban = iban.replace(/\s/g, '').toUpperCase();
-                    
-                    // Basic format check: length and country code
-                    if (iban.length < 5) {
-                        return {
-                            isValid: false,
-                            message: 'IBAN is too short',
-                            details: {
-                                country: 'Unknown',
-                                length: iban.length,
-                                format: 'Invalid',
-                                checkDigits: 'Invalid'
-                            }
-                        };
-                    }
-                    
-                    const countryCode = iban.substring(0, 2);
-                    const structure = ibanStructure[countryCode];
-                    
-                    // Check if country code is valid
-                    if (!structure) {
-                        return {
-                            isValid: false,
-                            message: 'Invalid country code',
-                            details: {
-                                country: 'Unknown (' + countryCode + ')',
-                                length: iban.length,
-                                format: 'Invalid',
-                                checkDigits: 'Invalid'
-                            }
-                        };
-                    }
-                    
-                    // Check length
-                    if (iban.length !== structure.length) {
-                        return {
-                            isValid: false,
-                            message: `IBAN length incorrect (should be ${structure.length} characters)`,
-                            details: {
-                                country: countryNames[countryCode] || countryCode,
-                                length: `${iban.length} (should be ${structure.length})`,
-                                format: 'Invalid length',
-                                checkDigits: 'Not checked'
-                            }
-                        };
-                    }
-                    
-                    // Character validation (only A-Z, 0-9 allowed)
-                    if (!/^[A-Z0-9]+$/.test(iban)) {
-                        return {
-                            isValid: false,
-                            message: 'IBAN contains invalid characters',
-                            details: {
-                                country: countryNames[countryCode] || countryCode,
-                                length: iban.length,
-                                format: 'Invalid characters',
-                                checkDigits: 'Not checked'
-                            }
-                        };
-                    }
-                    
-                    // Check digits validation (MOD 97-10)
-                    const checkDigits = iban.substring(2, 4);
-                    
-                    // Rearrange and convert to numeric
-                    let rearranged = iban.substring(4) + iban.substring(0, 4);
-                    let numerical = '';
-                    
-                    for (let i = 0; i < rearranged.length; i++) {
-                        let char = rearranged.charAt(i);
-                        if (/[A-Z]/.test(char)) {
-                            numerical += (char.charCodeAt(0) - 55);
-                        } else {
-                            numerical += char;
-                        }
-                    }
-                    
-                    // Calculate remainder
-                    let remainder = 0;
-                    for (let i = 0; i < numerical.length; i++) {
-                        remainder = (remainder * 10 + parseInt(numerical.charAt(i))) % 97;
-                    }
-                    
-                    const isValidChecksum = remainder === 1;
-                    
-                    return {
-                        isValid: isValidChecksum,
-                        message: isValidChecksum ? 'IBAN is valid' : 'Invalid check digits',
-                        details: {
-                            country: countryNames[countryCode] || countryCode,
-                            length: `${iban.length} (correct)`,
-                            format: structure.format || 'Valid format',
-                            checkDigits: isValidChecksum ? 'Valid' : 'Invalid'
-                        }
-                    };
-                }
-                
                 // Validate the IBAN
                 const result = validateIBANWithDetails(iban);
+                console.log("Validation result:", result);
                 
-                // Display validation result
-                validationResult.style.display = 'flex';
-                if (validationMessage) {
-                    validationMessage.textContent = result.message;
+                // Get or create validation message
+                let validationMessage = validationResult.querySelector('.validation-message');
+                if (!validationMessage) {
+                    validationMessage = document.createElement('div');
+                    validationMessage.className = 'validation-message';
+                    validationResult.appendChild(validationMessage);
                 }
+                
+                // Get or create validation icon
+                let validationIcon = validationResult.querySelector('.validation-icon');
+                if (!validationIcon) {
+                    validationIcon = document.createElement('div');
+                    validationIcon.className = 'validation-icon';
+                    const iconI = document.createElement('i');
+                    iconI.className = result.isValid ? 'fas fa-check-circle' : 'fas fa-times-circle';
+                    validationIcon.appendChild(iconI);
+                    validationResult.prepend(validationIcon);
+                } else {
+                    // Update existing icon
+                    let iconI = validationIcon.querySelector('i');
+                    if (!iconI) {
+                        iconI = document.createElement('i');
+                        validationIcon.appendChild(iconI);
+                    }
+                    iconI.className = result.isValid ? 'fas fa-check-circle' : 'fas fa-times-circle';
+                }
+                
+                // Update validation result display
+                validationResult.style.display = 'flex';
+                validationMessage.textContent = result.message;
                 
                 if (result.isValid) {
                     validationResult.classList.add('valid');
                     validationResult.classList.remove('invalid');
-                    validationResult.querySelector('.validation-icon i').className = 'fas fa-check-circle';
                 } else {
                     validationResult.classList.add('invalid');
                     validationResult.classList.remove('valid');
-                    validationResult.querySelector('.validation-icon i').className = 'fas fa-times-circle';
                 }
                 
-                // Show detailed information
+                // Update validation details
                 const validationDetails = document.getElementById('validation-details');
                 if (validationDetails) {
                     validationDetails.style.display = 'block';
+                    
+                    // Get or create detail elements
+                    const detailElements = {
+                        country: validationDetails.querySelector('#iban-country'),
+                        length: validationDetails.querySelector('#iban-length'),
+                        format: validationDetails.querySelector('#iban-format'),
+                        checkDigits: validationDetails.querySelector('#iban-check-digits')
+                    };
+                    
+                    // Update details
+                    if (detailElements.country) detailElements.country.textContent = result.details.country;
+                    if (detailElements.length) detailElements.length.textContent = result.details.length;
+                    if (detailElements.format) detailElements.format.textContent = result.details.format;
+                    if (detailElements.checkDigits) detailElements.checkDigits.textContent = result.details.checkDigits;
                 }
-                
-                if (ibanCountryDetail) ibanCountryDetail.textContent = result.details.country;
-                if (ibanLengthDetail) ibanLengthDetail.textContent = result.details.length;
-                if (ibanFormatDetail) ibanFormatDetail.textContent = result.details.format;
-                if (ibanCheckDigitsDetail) ibanCheckDigitsDetail.textContent = result.details.checkDigits;
                 
                 showNotification('IBAN validation complete', result.isValid ? 'success' : 'error');
             } catch (error) {
@@ -1012,7 +1205,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Add event listener for IBAN validation
-        validateIbanBtn.addEventListener('click', handleIBANValidation);
+        validateIbanBtn.addEventListener('click', () => {
+            console.log("Validate IBAN button clicked!");
+            handleIBANValidation();
+        });
         
         // Validate IBAN on Enter key in input field
         ibanToValidate.addEventListener('keydown', (e) => {
@@ -1021,8 +1217,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Link between generator and validator
-        if (validateGeneratedLink) {
+        // Link between generator and validator (if they exist)
+        const validateGeneratedLink = getElement('validate-generated-link');
+        const generateNewLink = getElement('generate-new-link');
+        const ibanResult = getElement('iban-result');
+        const generatorTab = getElement('generator-tab');
+        const validatorTab = getElement('validator-tab');
+        
+        if (validateGeneratedLink && ibanResult) {
             validateGeneratedLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 
@@ -1045,14 +1247,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Link from validator to generator
-        if (generateNewLink) {
+        if (generateNewLink && generatorTab) {
             generateNewLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 
                 // Switch to generator tab
-                if (generatorTab) generatorTab.click();
+                generatorTab.click();
             });
         }
+        
+        console.log("IBAN validator initialization complete");
     }
     
     // Debug function to test an IBAN validation

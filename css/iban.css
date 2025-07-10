@@ -1,0 +1,304 @@
+/* IBAN Page Specific Styles */
+.iban-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.country-selection-prompt {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: rgba(243, 156, 18, 0.1);
+    border-radius: var(--border-radius-sm);
+    border-left: 3px solid #f39c12;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #f39c12;
+    animation: pulse 2s infinite;
+}
+
+.country-selection-prompt.hidden {
+    display: none;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.iban-info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-radius: var(--border-radius-md);
+    border-left: 3px solid var(--primary-color);
+}
+
+.iban-info h3 {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.iban-info p {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.iban-info ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.iban-info li {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.country-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.country-button {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--card-bg);
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: center;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    position: relative;
+}
+
+.country-button span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.country-button:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.country-button.selected {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.country-button[data-popular="true"]::after {
+    content: "★";
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    font-size: 0.7rem;
+    color: #f39c12;
+}
+
+.country-button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.country-button.selected span {
+    color: white;
+}
+
+.dark-mode .country-button {
+    background-color: var(--dark-mode-card);
+    border-color: #2d3748;
+}
+
+.dark-mode .country-button:hover {
+    background-color: rgba(66, 153, 225, 0.2);
+    border-color: var(--primary-color);
+}
+
+.dark-mode .country-button.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.iban-format-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: rgba(52, 152, 219, 0.05);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+}
+
+.iban-format-info i {
+    color: var(--primary-color);
+}
+
+.validation-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.validation-header .success {
+    color: var(--success-color);
+}
+
+.validation-header .error {
+    color: var(--error-color);
+}
+
+.validation-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.validation-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+    background-color: rgba(52, 152, 219, 0.05);
+    border-radius: var(--border-radius-sm);
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.validation-detail.error {
+    background-color: rgba(231, 76, 60, 0.05);
+    border-left: 3px solid var(--error-color);
+}
+
+.result-card {
+    background-color: rgba(52, 152, 219, 0.05);
+    padding: 15px;
+    border-radius: var(--border-radius-md);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 15px 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 1px;
+}
+
+.section-divider {
+    margin: 30px 0;
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(52, 152, 219, 0.5), rgba(0, 0, 0, 0));
+}
+
+.dark-mode .section-divider {
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(52, 152, 219, 0.3), rgba(0, 0, 0, 0));
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.quick-link-button {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.quick-link-button:hover {
+    color: var(--primary-dark);
+}
+
+.dark-mode .iban-info {
+    background-color: rgba(66, 153, 225, 0.1);
+    border-left-color: var(--primary-color);
+}
+
+.dark-mode .iban-format-info {
+    background-color: rgba(66, 153, 225, 0.1);
+}
+
+.dark-mode .validation-detail {
+    background-color: rgba(66, 153, 225, 0.1);
+}
+
+.dark-mode .validation-detail.error {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+.dark-mode .result-card {
+    background-color: rgba(66, 153, 225, 0.1);
+}
+
+.input-help {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.dark-mode .input-help {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.error-input {
+    border-color: var(--error-color) !important;
+    background-color: rgba(231, 76, 60, 0.05) !important;
+}
+
+.error-text {
+    color: var(--error-color) !important;
+}
+
+.optional-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: normal;
+    font-style: italic;
+}
+
+.dark-mode .optional-label {
+    color: rgba(255, 255, 255, 0.6);
+}
